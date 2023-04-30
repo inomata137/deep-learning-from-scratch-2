@@ -1,6 +1,7 @@
 # coding: utf-8
 import sys
 sys.path.append('..')
+sys.path.append('../ch07')
 import numpy as np
 import matplotlib.pyplot as plt
 from dataset import sequence
@@ -24,7 +25,7 @@ vocab_size = len(char_to_id)
 wordvec_size = 16
 hidden_size = 256
 batch_size = 128
-max_epoch = 10
+max_epoch = 3
 max_grad = 5.0
 
 model = AttentionSeq2seq(vocab_size, wordvec_size, hidden_size)
