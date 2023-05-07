@@ -18,6 +18,11 @@ from ch07.peeky_seq2seq import PeekySeq2seq
 char_to_id, id_to_char = sequence.get_vocab()
 
 # 入力文を反転
+'''
+x_train: 45000 x 29
+x_test: 5000 x 29
+それぞれの行に対して、行の中身を反転する
+'''
 x_train, x_test = x_train[:, ::-1], x_test[:, ::-1]
 
 # ハイパーパラメータの設定
