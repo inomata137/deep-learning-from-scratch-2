@@ -12,14 +12,14 @@ class MatMul:
 
     def forward(self, x):
         W, = self.params
-        out = np.dot(x, W)
+        out = np.matmul(x, W)
         self.x = x
         return out
 
     def backward(self, dout):
         W, = self.params
-        dx = np.dot(dout, W.T)
-        dW = np.dot(self.x.T, dout)
+        dx = np.matmul(dout, W.T)
+        dW = np.sum(np.matmul(self.x.transpose((0, 2, 1)), dout), axis=0)
         self.grads[0][...] = dW
         return dx
 
@@ -38,9 +38,10 @@ class Affine:
 
     def backward(self, dout):
         W, b = self.params
-        dx = np.dot(dout, W.T)
-        dW = np.dot(self.x.T, dout)
-        db = np.sum(dout, axis=0)
+        db = np.sum(dout, axis=(0,1))
+        dx = np.matmul(dout, W.T)
+        dims = list(range(dout.ndim - 1))
+        dW = np.tensordot(self.x, dout, (dims, dims))
 
         self.grads[0][...] = dW
         self.grads[1][...] = db
@@ -58,7 +59,7 @@ class Softmax:
 
     def backward(self, dout):
         dx = self.out * dout
-        sumdx = np.sum(dx, axis=1, keepdims=True)
+        sumdx = np.sum(dx, axis=-1, keepdims=True)
         dx -= self.out * sumdx
         return dx
 

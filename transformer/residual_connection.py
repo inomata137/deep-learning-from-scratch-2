@@ -11,17 +11,18 @@ class LayerNorm:
         self.eps = eps
 
     def forward(self, x):
+        '''
+        x: N x n x d_m tensor
+        '''
         n = np.size(x)
         mu = np.sum(x) / n
-        shape = np.shape(x)
-        x = np.reshape(x, (1, n))
-        sqsum = np.sum((x - mu) * (x - mu))
-        sigma = np.sqrt(sqsum / n) + self.eps
+        sqsum = np.sum((x - mu) ** 2 / n)
+        sigma = np.sqrt(sqsum) + self.eps
         self.mu = mu
         self.sigma = sigma
-        self.x = x
+        self.x = x.reshape((1, n))
         o = (x - mu) / sigma
-        return np.reshape(o, shape)
+        return o
 
     def backward(self, dout):
         mu = self.mu
@@ -45,8 +46,10 @@ class ResidualConnection:
     
     def forward(self, x):
         s = x + self.layer.forward(x)
-        return self.ln.forward(s)
+        out = self.ln.forward(s)
+        return out
 
-    def backward(self, dx):
-        do = self.ln.backward(dx)
-        return do + self.layer.backward(do)
+    def backward(self, dout):
+        dx = self.ln.backward(dout)
+        dx += self.layer.backward(dx)
+        return dx

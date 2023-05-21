@@ -19,16 +19,16 @@ class SelfAttention:
         self.simple_matmul2 =  SimpleMatMul()
         self.softmax_layer = Softmax()
         self.d_k = d_k
-        self.params = []
-        self.grads = []
+        self.params = self.input_matmul.params + self.output_matmul.params
+        self.grads = self.input_matmul.grads + self.output_matmul.grads
     
     def forward(self, x):
         d_k = self.d_k
         xw = self.input_matmul.forward(x)
-        q = xw[:, :d_k]
-        k = xw[:, d_k:2*d_k]
-        v = xw[:, 2*d_k:]
-        a = self.simple_matmul1.forward(q, k.T) / np.sqrt(d_k)
+        q = xw[:, :, :d_k]
+        k = xw[:, :, d_k:2*d_k]
+        v = xw[:, :, 2*d_k:]
+        a = self.simple_matmul1.forward(q, k.transpose((0, 2, 1))) / np.sqrt(d_k)
         sm = self.softmax_layer.forward(a)
         att = self.simple_matmul2.forward(sm, v)
         out = self.output_matmul.forward(att)
@@ -40,7 +40,25 @@ class SelfAttention:
         dsm, dv = self.simple_matmul2.backward(datt)
         da = self.softmax_layer.backward(dsm)
         dq, dkT = self.simple_matmul1.backward(da * np.sqrt(d_k))
-        dk = dkT.T
-        dxw = np.hstack((dq, dk, dv))
+        dk = dkT.transpose((0, 2, 1))
+        dxw = np.dstack((dq, dk, dv))
         dx = self.input_matmul.backward(dxw)
         return dx
+    
+if __name__ == '__main__':
+    batch = 3
+    words_len = 29
+    d_m = 64
+    h = 1
+    d_k = int(d_m / h)
+    d_v = d_k
+
+    Wi = np.random.randn(d_m, 2 * d_k + d_v)
+    Wo = np.random.randn(d_v, d_m)
+
+    layer = SelfAttention(Wi, Wo)
+
+    input = np.random.randn(batch, words_len, d_m)
+    output = layer.forward(input)
+    dout = np.random.randn(*output.shape)
+    din = layer.backward(dout)

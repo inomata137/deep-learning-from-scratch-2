@@ -11,9 +11,9 @@ class SimpleMatMul:
 
     def forward(self, a, b):
         self.a, self.b = a, b
-        return np.dot(a, b)
+        return np.matmul(a, b)
 
     def backward(self, dout):
-        da = np.dot(dout, self.b.T)
-        db = np.dot(self.a.T, dout)
+        da = np.matmul(dout, self.b.transpose((0, 2, 1)))
+        db = np.matmul(self.a.transpose((0, 2, 1)), dout)
         return da, db

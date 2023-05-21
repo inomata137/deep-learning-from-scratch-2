@@ -13,8 +13,8 @@ class Relu:
         self.cache = None
     def forward(self, x):
         r = relu(x)
-        self.cache = np.heaviside(x, 0.5)
-        return relu(x)
+        self.cache = np.heaviside(x, 0.)
+        return r
     def backward(self, dx):
         return self.cache * dx
 
@@ -33,8 +33,14 @@ class PositionWiseFfn:
         ]
         self.params = []
         self.grads = []
+        for layer in self.affine_layers:
+            self.params += layer.params
+            self.grads += layer.grads
     
     def forward(self, x):
+        '''
+        x: N x n x d_m
+        '''
         t = self.affine_layers[0].forward(x)
         a = self.relu_layer.forward(t)
         o = self.affine_layers[1].forward(a)

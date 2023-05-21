@@ -10,15 +10,10 @@ def relu(x):
     return np.maximum(0, x)
 
 
-def softmax(x):
-    if x.ndim == 2:
-        x = x - x.max(axis=1, keepdims=True)
-        x = np.exp(x)
-        x /= x.sum(axis=1, keepdims=True)
-    elif x.ndim == 1:
-        x = x - np.max(x)
-        x = np.exp(x) / np.sum(np.exp(x))
-
+def softmax(x: np.ndarray):
+    x -= x.max(axis=-1, keepdims=True)
+    x = np.exp(x)
+    x /= x.sum(axis=-1, keepdims=True)
     return x
 
 
@@ -34,3 +29,9 @@ def cross_entropy_error(y, t):
     batch_size = y.shape[0]
 
     return -np.sum(np.log(y[np.arange(batch_size), t] + 1e-7)) / batch_size
+
+def normalize(x: np.ndarray):
+    mu = np.mean(x)
+    n = np.size(x)
+    sigma = np.sqrt(np.sum((x - mu) ** 2) / n)
+    return (x - mu) / sigma
