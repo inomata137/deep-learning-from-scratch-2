@@ -14,6 +14,6 @@ class SimpleMatMul:
         return np.matmul(a, b)
 
     def backward(self, dout):
-        da = np.matmul(dout, self.b.transpose((0, 2, 1)))
-        db = np.matmul(self.a.transpose((0, 2, 1)), dout)
+        da = np.matmul(dout, self.b.swapaxes(-2, -1))
+        db = np.matmul(self.a.swapaxes(-2, -1), dout)
         return da, db

@@ -12,5 +12,5 @@ def pe(x, scale=1.):
     pe_even = np.sin(pos / 10000**(dim / c)) * ((dim + 1) % 2)
     pe_odd = np.cos(pos / 10000**((dim - 1) / c)) * (dim % 2)
     _pe = (pe_even + pe_odd) * scale
-    _pe = _pe.reshape(1, r, c).repeat(b, axis=b)
+    _pe = _pe.reshape(1, r, c).repeat(b, axis=0)
     return _pe

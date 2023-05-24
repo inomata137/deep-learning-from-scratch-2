@@ -19,7 +19,7 @@ class MatMul:
     def backward(self, dout):
         W, = self.params
         dx = np.matmul(dout, W.T)
-        dW = np.sum(np.matmul(self.x.transpose((0, 2, 1)), dout), axis=0)
+        dW = np.sum(np.matmul(self.x.swapaxes(-2, -1), dout), axis=0)
         self.grads[0][...] = dW
         return dx
 
@@ -75,8 +75,8 @@ class SoftmaxWithLoss:
         self.y = softmax(x)
 
         # 教師ラベルがone-hotベクトルの場合、正解のインデックスに変換
-        if self.t.size == self.y.size:
-            self.t = self.t.argmax(axis=1)
+        # if self.t.size == self.y.size:
+        #     self.t = self.t.argmax(axis=1)
 
         loss = cross_entropy_error(self.y, self.t)
         return loss
@@ -85,7 +85,7 @@ class SoftmaxWithLoss:
         batch_size = self.t.shape[0]
 
         dx = self.y.copy()
-        dx[np.arange(batch_size), self.t] -= 1
+        dx[self.t.argmax(axis=1)] -= 1
         dx *= dout
         dx = dx / batch_size
 

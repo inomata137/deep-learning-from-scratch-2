@@ -23,12 +23,12 @@ def cross_entropy_error(y, t):
         y = y.reshape(1, y.size)
         
     # 教師データがone-hot-vectorの場合、正解ラベルのインデックスに変換
-    if t.size == y.size:
-        t = t.argmax(axis=1)
+    # if t.size == y.size:
+    #     t = t.argmax(axis=1)
              
     batch_size = y.shape[0]
 
-    return -np.sum(np.log(y[np.arange(batch_size), t] + 1e-7)) / batch_size
+    return -np.sum(np.log(y + 1e-7) * t) / batch_size
 
 def normalize(x: np.ndarray):
     mu = np.mean(x)
