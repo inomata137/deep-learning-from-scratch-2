@@ -1,29 +1,31 @@
 # coding: utf-8
 import sys
 sys.path.append('..')
-sys.path.append('../ch07')
-import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from dataset import sequence
 from common.optimizer import Adam
 from common.trainer import Trainer
 from common.util import eval_seq2seq
 from transformer import TransformerSeq2Seq
-# from ch07.seq2seq import Seq2seq
-# from ch07.peeky_seq2seq import PeekySeq2seq
 
 
 # データの読み込み
 (x_train, t_train), (x_test, t_test) = sequence.load_data('date.txt')
 char_to_id, id_to_char = sequence.get_vocab()
 
+# 訓練データを減らす
+x_train = x_train[:1000]
+t_train = t_train[:1000]
+x_test = x_test[:100]
+t_test = t_test[:100]
+
 # 入力文を反転
-# '''
-# x_train: 45000 x 29
-# x_test: 5000 x 29
-# それぞれの行に対して、行の中身を反転する
-# '''
-# x_train, x_test = x_train[:, ::-1], x_test[:, ::-1]
+'''
+x_train: 45000 x 29
+x_test: 5000 x 29
+それぞれの行に対して、行の中身を反転する
+'''
+x_train, x_test = x_train[:, ::-1], x_test[:, ::-1]
 
 # ハイパーパラメータの設定
 vocab_size = len(char_to_id)
@@ -33,14 +35,14 @@ d_k = d_v = 16
 enc_rep = 2
 dec_rep = 2
 batch_size = 128
-max_epoch = 3
+max_epoch = 10
 max_grad = 5.0
 
 model = TransformerSeq2Seq(vocab_size, d_m, d_k, d_v, d_ff, enc_rep, dec_rep)
 # model = Seq2seq(vocab_size, wordvec_size, hidden_size)
 # model = PeekySeq2seq(vocab_size, wordvec_size, hidden_size)
 
-optimizer = Adam()
+optimizer = Adam(lr=0.01)
 trainer = Trainer(model, optimizer)
 
 acc_list = []
@@ -60,12 +62,13 @@ for epoch in range(max_epoch):
     print('val acc %.3f%%' % (acc * 100))
 
 
-# model.save_params()
+model.save_params()
 
+print(acc_list)
 # グラフの描画
-x = np.arange(len(acc_list))
-plt.plot(x, acc_list, marker='o')
-plt.xlabel('epochs')
-plt.ylabel('accuracy')
-plt.ylim(-0.05, 1.05)
-plt.show()
+# x = np.arange(len(acc_list))
+# plt.plot(x, acc_list, marker='o')
+# plt.xlabel('epochs')
+# plt.ylabel('accuracy')
+# plt.ylim(-0.05, 1.05)
+# plt.show()

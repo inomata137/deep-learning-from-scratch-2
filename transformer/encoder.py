@@ -9,7 +9,7 @@ from common.np import *  # import numpy as np
 rn = np.random.randn
 
 class Encoder:
-    def __init__(self, d_m, d_k, d_v, d_ff, repeat_num=6):
+    def __init__(self, d_m, d_k, d_v, d_ff, repeat_num=6, rn=rn):
         Wi_shape = d_m, 2 * d_k + d_v
         Wo_shape = d_v, d_m
         W1_shape = d_m, d_ff

@@ -6,14 +6,15 @@ import sys
 sys.path.append('..')
 from common.np import *
 from common.layers import SoftmaxWithLoss
+from common.base_model import BaseModel
 
 np.random.seed(2023)
 rn = np.random.randn
 
 class Transformer:
-    def __init__(self, d_m, d_k, d_v, d_ff, enc_rep, dec_rep):
-        self.enc = Encoder(d_m, d_k, d_v, d_ff, enc_rep)
-        self.dec = Decoder(d_m, d_k, d_v, d_ff, dec_rep)
+    def __init__(self, d_m, d_k, d_v, d_ff, enc_rep, dec_rep, rn=rn):
+        self.enc = Encoder(d_m, d_k, d_v, d_ff, enc_rep, rn)
+        self.dec = Decoder(d_m, d_k, d_v, d_ff, dec_rep, rn)
         self.params = self.enc.params + self.dec.params
         self.grads = self.enc.grads + self.dec.grads
     
@@ -33,10 +34,10 @@ class Transformer:
         dx_enc = self.enc.backward(dhs)
         return dx_dec, dx_enc
 
-class TransformerSeq2Seq:
+class TransformerSeq2Seq(BaseModel):
     def __init__(self, vocab_size, d_m, d_k, d_v, d_ff, enc_rep, dec_rep):
-        W = np.random.randn(vocab_size, d_m)
-        args = d_m, d_k, d_v, d_ff, enc_rep, dec_rep
+        W = rn(vocab_size, d_m)
+        args = d_m, d_k, d_v, d_ff, enc_rep, dec_rep, rn
         self.layer = Transformer(*args)
         self.vocab_size = vocab_size
         self.input_matmul = SimpleMatMul()
@@ -78,3 +79,33 @@ class TransformerSeq2Seq:
         dw += dwt.swapaxes(-2, -1)
         dw = dw.sum(axis=0)
         self.grads[0][...] = dw
+        return
+
+    def generate(self, x_enc, start_id, length):
+        '''
+        x_enc: 1 x n
+        '''
+        _, n = x_enc.shape
+        W = self.params[0]
+        x_dec = np.zeros((1, length), dtype=int)
+        x_dec[0, 0] = start_id
+        vs = self.vocab_size
+        x_enc_one_hot = np.eye(vs)[x_enc]
+        # N x n x vs
+
+        for i in range(length):
+            x_dec_one_hot = np.eye(vs)[x_dec]
+            # N x m x vs
+            x_one_hot = np.hstack((x_enc_one_hot, x_dec_one_hot))
+            # N x (n+m) x vs
+            x_encoded = self.input_matmul.forward(x_one_hot, W)
+            x_enc_encoded = x_encoded[:, :n, :]
+            x_dec_encoded = x_encoded[:, n:, :]
+            out = self.layer.forward(x_enc_encoded, x_dec_encoded)
+            out = self.output_matmul.forward(out, W.T)[0, i]
+            # vs-size one-hot-like vector
+            if i + 1 < length:
+                x_dec[0, i + 1] = np.argmax(out)
+        
+        return x_dec[0]
+    

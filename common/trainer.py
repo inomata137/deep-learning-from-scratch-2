@@ -3,7 +3,7 @@ import sys
 sys.path.append('..')
 import numpy
 import time
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from common.np import *  # import numpy as np
 from common.util import clip_grads
 
@@ -56,14 +56,14 @@ class Trainer:
 
             self.current_epoch += 1
 
-    def plot(self, ylim=None):
-        x = numpy.arange(len(self.loss_list))
-        if ylim is not None:
-            plt.ylim(*ylim)
-        plt.plot(x, self.loss_list, label='train')
-        plt.xlabel('iterations (x' + str(self.eval_interval) + ')')
-        plt.ylabel('loss')
-        plt.show()
+    # def plot(self, ylim=None):
+    #     x = numpy.arange(len(self.loss_list))
+    #     if ylim is not None:
+    #         plt.ylim(*ylim)
+    #     plt.plot(x, self.loss_list, label='train')
+    #     plt.xlabel('iterations (x' + str(self.eval_interval) + ')')
+    #     plt.ylabel('loss')
+    #     plt.show()
 
 
 class RnnlmTrainer:
@@ -127,14 +127,14 @@ class RnnlmTrainer:
 
             self.current_epoch += 1
 
-    def plot(self, ylim=None):
-        x = numpy.arange(len(self.ppl_list))
-        if ylim is not None:
-            plt.ylim(*ylim)
-        plt.plot(x, self.ppl_list, label='train')
-        plt.xlabel('iterations (x' + str(self.eval_interval) + ')')
-        plt.ylabel('perplexity')
-        plt.show()
+    # def plot(self, ylim=None):
+    #     x = numpy.arange(len(self.ppl_list))
+    #     if ylim is not None:
+    #         plt.ylim(*ylim)
+    #     plt.plot(x, self.ppl_list, label='train')
+    #     plt.xlabel('iterations (x' + str(self.eval_interval) + ')')
+    #     plt.ylabel('perplexity')
+    #     plt.show()
 
 
 def remove_duplicate(params, grads):
