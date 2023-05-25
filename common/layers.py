@@ -85,7 +85,7 @@ class SoftmaxWithLoss:
         batch_size = self.t.shape[0]
 
         dx = self.y.copy()
-        dx[self.t.argmax(axis=1)] -= 1
+        dx[self.t.argmax(axis=-1)] -= 1
         dx *= dout
         dx = dx / batch_size
 
