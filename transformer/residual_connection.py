@@ -61,7 +61,7 @@ class ResidualConnection:
 
     def backward(self, dout):
         dx1 = self.ln.backward(dout)
-        dx2 = self.layer.backward(dout)
+        dx2 = self.layer.backward(dx1)
         if type(dx2) == tuple:
             dx1 += dx2[0]
             return dx1, dx2[1:]

@@ -40,7 +40,7 @@ class Attention:
         d_k = self.d_k
         datt = self.matmul_o.backward(dout)
         dsm, dv = self.matmul_at.backward(datt)
-        da = self.softmax_layer.backward(dsm) * np.sqrt(d_k)
+        da = self.softmax_layer.backward(dsm) / np.sqrt(d_k)
         dq, dkt = self.matmul_qk.backward(da)
         dk = dkt.swapaxes(-2, -1)
         dq, dwq = self.matmul_q.backward(dq)
