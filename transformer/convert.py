@@ -2,7 +2,7 @@ import pickle
 import numpy
 
 with open('./embed.pkl', 'rb') as f:
-    param = pickle.load(f)[0]
+    param = pickle.load(f)
 
 if type(param) is not numpy.ndarray:
     exit()
