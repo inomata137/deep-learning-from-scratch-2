@@ -44,7 +44,7 @@ class SelfAttention:
         da = self.softmax_layer.backward(dsm)
         if self.mask:
             da = mask_backward(da)
-        dq, dkT = self.simple_matmul1.backward(da * np.sqrt(d_k))
+        dq, dkT = self.simple_matmul1.backward(da / np.sqrt(d_k))
         dk = dkT.swapaxes(-2, -1)
         dxw = np.dstack((dq, dk, dv))
         dx = self.input_matmul.backward(dxw)
@@ -61,21 +61,3 @@ def mask_forward(x):
 def mask_backward(dout):
     r, c = dout.shape[-2:]
     return dout * np.tri(r, c, 0)
-
-if __name__ == '__main__':
-    batch = 3
-    words_len = 29
-    d_m = 64
-    h = 1
-    d_k = int(d_m / h)
-    d_v = d_k
-
-    Wi = np.random.randn(d_m, 2 * d_k + d_v)
-    Wo = np.random.randn(d_v, d_m)
-
-    layer = SelfAttention(Wi, Wo)
-
-    input = np.random.randn(batch, words_len, d_m)
-    output = layer.forward(input)
-    dout = np.random.randn(*output.shape)
-    din = layer.backward(dout)
