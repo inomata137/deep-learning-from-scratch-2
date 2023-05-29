@@ -82,14 +82,12 @@ class SoftmaxWithLoss:
         return loss
 
     def backward(self, dout=1):
-        batch_size, m, vs = self.t.shape
-        t = self.t.reshape((batch_size * m, vs))
+        t = self.t
 
-        dx = self.y.copy().reshape((batch_size * m, vs))
+        dx = self.y.copy()
         dx[t.argmax(axis=-1)] -= 1
-        dx = dx.reshape((batch_size, m, vs))
         dx *= dout
-        dx = dx / batch_size
+        dx = dx / t.shape[0]
 
         return dx
 

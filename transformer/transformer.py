@@ -58,6 +58,8 @@ class TransformerSeq2Seq(BaseModel):
         N, n = x_enc.shape
         _, m = x_dec.shape
         vs = self.vocab_size
+        self.N = N
+        self.m = m
         x_enc_one_hot = np.eye(vs)[x_enc]
         # N x n x vs
         x_dec_one_hot = np.eye(vs)[x_dec]
@@ -70,11 +72,15 @@ class TransformerSeq2Seq(BaseModel):
 
         out = self.layer.forward(x_enc_encoded, x_dec_encoded)
         out = self.output_matmul.forward(out, W.T)
-        loss = self.softmax.forward(out, np.roll(x_dec_one_hot, -1, -1))
+        loss = self.softmax.forward(out.reshape((N * m, vs)), np.roll(x_dec_one_hot, -1, -1).reshape((N * m, vs)))
+
         return loss
     
     def backward(self, dout=1.):
-        dout = self.softmax.backward()
+        N = self.N
+        m = self.m
+        vs = self.vocab_size
+        dout = self.softmax.backward().reshape((N, m, vs))
         dout, dwt = self.output_matmul.backward(dout)
         dx_dec, dx_enc = self.layer.backward(dout)
         dx = np.hstack((dx_enc, dx_dec))
