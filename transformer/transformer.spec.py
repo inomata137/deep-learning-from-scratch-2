@@ -5,13 +5,13 @@ from common.np import *
 
 rn = np.random.randn
 
-vocab_size = 100
-d_m = 4
+vocab_size = 59
+d_m = 16
 d_k = d_v = d_m
-d_ff = 8
+d_ff = 32
 enc_rep = 2
 dec_rep = 2
-batch = 2
+batch = 20
 
 i1 = np.array([[
     1, 2, 3, 4, 5

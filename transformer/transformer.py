@@ -2,6 +2,7 @@ from encoder import Encoder
 from decoder import Decoder
 from simple_matmul import SimpleMatMul
 from pe import pe
+import pickle
 import sys
 sys.path.append('..')
 from common.np import *
@@ -10,6 +11,8 @@ from common.base_model import BaseModel
 
 np.random.seed(2023)
 rn = np.random.randn
+with open('./embed.pkl', 'rb') as f:
+    embed_weight = pickle.load(f)
 
 class Transformer:
     def __init__(self, d_m, d_k, d_v, d_ff, enc_rep, dec_rep, rn=rn):
@@ -36,22 +39,22 @@ class Transformer:
 
 class TransformerSeq2Seq(BaseModel):
     def __init__(self, vocab_size, d_m, d_k, d_v, d_ff, enc_rep, dec_rep):
-        W = rn(vocab_size, d_m)
+        self.W = embed_weight
         args = d_m, d_k, d_v, d_ff, enc_rep, dec_rep, rn
         self.layer = Transformer(*args)
         self.vocab_size = vocab_size
         self.input_matmul = SimpleMatMul()
         self.output_matmul = SimpleMatMul()
         self.softmax = SoftmaxWithLoss()
-        self.params = [W] + self.layer.params
-        self.grads = [np.zeros_like(W)] + self.layer.grads
+        self.params = self.layer.params
+        self.grads = self.layer.grads
     
     def forward(self, x_enc, x_dec):
         '''
         x_enc: N x n
         x_dec: N x m
         '''
-        W = self.params[0]
+        W = self.W
         N, n = x_enc.shape
         _, m = x_dec.shape
         vs = self.vocab_size
@@ -76,9 +79,8 @@ class TransformerSeq2Seq(BaseModel):
         dx_dec, dx_enc = self.layer.backward(dout)
         dx = np.hstack((dx_enc, dx_dec))
         _, dw = self.input_matmul.backward(dx)
-        dw += dwt.swapaxes(-2, -1)
-        dw = dw.sum(axis=0)
-        self.grads[0][...] = dw
+        # dw += dwt.swapaxes(-2, -1)
+        # dw = dw.sum(axis=0)
         return
 
     def generate(self, x_enc, start_id, length):
@@ -86,7 +88,7 @@ class TransformerSeq2Seq(BaseModel):
         x_enc: 1 x n
         '''
         _, n = x_enc.shape
-        W = self.params[0]
+        W = self.W
         x_dec = np.zeros((1, length), dtype=int)
         x_dec[0, 0] = start_id
         vs = self.vocab_size
