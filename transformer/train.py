@@ -19,14 +19,6 @@ t_train = t_train[:1000]
 x_test = x_test[:100]
 t_test = t_test[:100]
 
-# 入力文を反転
-'''
-x_train: 45000 x 29
-x_test: 5000 x 29
-それぞれの行に対して、行の中身を反転する
-'''
-x_train, x_test = x_train[:, ::-1], x_test[:, ::-1]
-
 # ハイパーパラメータの設定
 vocab_size = len(char_to_id)
 d_m = wordvec_size = 16
@@ -55,7 +47,7 @@ for epoch in range(max_epoch):
         question, correct = x_test[[i]], t_test[[i]]
         verbose = i < 10
         correct_num += eval_seq2seq(model, question, correct,
-                                    id_to_char, verbose, is_reverse=True)
+                                    id_to_char, verbose)
 
     acc = float(correct_num) / len(x_test)
     acc_list.append(acc)
