@@ -84,10 +84,10 @@ class TransformerSeq2Seq(BaseModel):
         dout, dwt = self.output_matmul.backward(dout)
         dx_dec, dx_enc = self.layer.backward(dout)
         dx = np.hstack((dx_enc, dx_dec))
-        _, dw = self.input_matmul.backward(dx)
+        dx, dw = self.input_matmul.backward(dx)
         # dw += dwt.swapaxes(-2, -1)
         # dw = dw.sum(axis=0)
-        return
+        return dx
 
     def generate(self, x_enc, start_id, length):
         '''
