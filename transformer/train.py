@@ -16,17 +16,17 @@ char_to_id, id_to_char = sequence.get_vocab()
 # 訓練データを減らす
 x_train = x_train[:1000]
 t_train = t_train[:1000]
-x_test = x_test[:100]
-t_test = t_test[:100]
+x_test = x_test[:12]
+t_test = t_test[:12]
 
 # ハイパーパラメータの設定
 vocab_size = len(char_to_id)
 d_m = wordvec_size = 16
-d_ff = hidden_size = 256
+d_ff = hidden_size = 64
 d_k = d_v = 16
-enc_rep = 2
-dec_rep = 2
-batch_size = 128
+enc_rep = 1
+dec_rep = 1
+batch_size = 32
 max_epoch = 10
 max_grad = 5.0
 
@@ -38,6 +38,13 @@ optimizer = Adam(lr=0.01)
 trainer = Trainer(model, optimizer)
 
 acc_list = []
+
+correct_num = 0
+for i in range(len(x_test)):
+    question, correct = x_test[[i]], t_test[[i]]
+    verbose = i < 10
+    correct_num += eval_seq2seq(model, question, correct,
+                                id_to_char, verbose)
 for epoch in range(max_epoch):
     trainer.fit(x_train, t_train, max_epoch=1,
                 batch_size=batch_size, max_grad=max_grad)
