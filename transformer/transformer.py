@@ -48,6 +48,7 @@ class TransformerSeq2Seq(BaseModel):
         self.softmax = SoftmaxWithLoss()
         self.params = self.layer.params
         self.grads = self.layer.grads
+        self.d_m = d_m
     
     def forward(self, x_enc, x_dec):
         '''
@@ -66,7 +67,7 @@ class TransformerSeq2Seq(BaseModel):
         # N x m x vs
         x_one_hot = np.hstack((x_enc_one_hot, x_dec_one_hot))
         # N x (n+m) x vs
-        x_encoded = self.input_matmul.forward(x_one_hot, W)
+        x_encoded = self.input_matmul.forward(x_one_hot, W) * self.d_m
         x_enc_encoded = x_encoded[:, :n, :]
         x_dec_encoded = x_encoded[:, n:, :]
 

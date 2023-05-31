@@ -24,9 +24,9 @@ class Encoder:
                 )),
                 ResidualConnection(PositionWiseFfn(
                     rn(*W1_shape) / np.sqrt(d_m),
-                    rn(*b1_shape) * 0.01,
+                    rn(*b1_shape) * 0.1,
                     rn(*W2_shape) / np.sqrt(d_ff),
-                    rn(*b2_shape) * 0.01
+                    rn(*b2_shape) * 0.1
                 ))
             ] for _ in range(repeat_num)
         ]
