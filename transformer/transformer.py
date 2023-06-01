@@ -38,8 +38,7 @@ class Transformer(BaseModel):
         _, m = x_dec.shape
         self.N = N
         self.m = m
-        x_one_hot = np.hstack((x_enc, x_dec))
-        x_encoded = self.embed.forward(x_one_hot)
+        x_encoded = self.embed.forward(np.hstack((x_enc, x_dec)))
         x_enc_encoded = x_encoded[:, :n, :]
         x_dec_encoded = x_encoded[:, n:, :]
         x_enc_encoded += pe(x_enc_encoded)
@@ -73,12 +72,9 @@ class Transformer(BaseModel):
         _, n = x_enc.shape
         x_dec = np.zeros((1, length), dtype=int)
         x_dec[0, 0] = start_id
-        x_enc_one_hot = np.eye(vs)[x_enc]
         
         for i in range(length - 1):
-            x_dec_one_hot = np.eye(vs)[x_dec]
-            x_one_hot = np.hstack((x_enc_one_hot, x_dec_one_hot))
-            x_encoded = self.embed.forward(x_one_hot)
+            x_encoded = self.embed.forward(np.hstack((x_enc, x_dec)))
             x_enc_encoded = x_encoded[:, :n, :]
             x_dec_encoded = x_encoded[:, n:, :]
             x_enc_encoded += pe(x_enc_encoded)
