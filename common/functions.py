@@ -26,12 +26,11 @@ def cross_entropy_error(y, t):
     # if t.size == y.size:
     #     t = t.argmax(axis=1)
              
-    batch_size = y.shape[0]
+    size = y.shape[0]
 
-    return -np.sum(np.log(y + 1e-7) * t) / batch_size
+    return -np.sum(np.log(y + 1e-7) * t) / size
 
 def normalize(x: np.ndarray):
     mu = np.mean(x)
-    n = np.size(x)
-    sigma = np.sqrt(np.sum((x - mu) ** 2) / n)
+    sigma = np.sqrt(np.mean((x - mu) ** 2))
     return (x - mu) / sigma

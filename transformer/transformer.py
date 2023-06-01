@@ -1,22 +1,23 @@
 from encoder import Encoder
 from decoder import Decoder
-from simple_matmul import SimpleMatMul
 from pe import pe
 import pickle
 import sys
 sys.path.append('..')
 from common.np import *
-from common.layers import SoftmaxWithLoss, MatMul
+from common.layers import SoftmaxWithLoss, MatMul, Embedding
 from common.base_model import BaseModel
 
 np.random.seed(2023)
 rn = np.random.randn
-with open('./embed.pkl', 'rb') as f:
-    embed_weight = pickle.load(f)
+# with open('./embed.pkl', 'rb') as f:
+#     embed_weight = pickle.load(f)
+
+embed_weight = np.load('./learned_W_embed.npy')
 
 class Transformer(BaseModel):
     def __init__(self, d_m: int, d_k: int, d_v: int, d_ff: int, vocab_size: int, enc_rep=1, dec_rep=1, rn=rn):
-        self.embed = MatMul(embed_weight) # (vs, d_m)
+        self.embed = Embedding(embed_weight) # (vs, d_m)
         self.enc = Encoder(d_m, d_k, d_v, d_ff, enc_rep, rn)
         self.dec = Decoder(d_m, d_k, d_v, d_ff, dec_rep, rn)
         self.matmul = MatMul(rn(d_m, vocab_size))
@@ -37,9 +38,7 @@ class Transformer(BaseModel):
         _, m = x_dec.shape
         self.N = N
         self.m = m
-        x_enc_one_hot = np.eye(vs)[x_enc]
-        x_dec_one_hot = np.eye(vs)[x_dec]
-        x_one_hot = np.hstack((x_enc_one_hot, x_dec_one_hot))
+        x_one_hot = np.hstack((x_enc, x_dec))
         x_encoded = self.embed.forward(x_one_hot)
         x_enc_encoded = x_encoded[:, :n, :]
         x_dec_encoded = x_encoded[:, n:, :]
@@ -50,7 +49,7 @@ class Transformer(BaseModel):
         y = self.matmul.forward(y)
         loss = self.softmax.forward(
             y.reshape((N * m, vs)),
-            np.roll(x_dec_one_hot, -1, -1).reshape((N * m, vs))
+            np.roll(np.eye(vs)[x_dec], -1, 1).reshape((N * m, vs))
         )
         return loss
     
