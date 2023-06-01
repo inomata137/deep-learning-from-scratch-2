@@ -19,19 +19,19 @@ class Decoder:
         b2_shape = 1, d_m
         self.layers = [[
             ResidualConnection(SelfAttention(
-                rn(*Wi_shape) / np.sqrt(d_m),
-                rn(*Wo_shape) / np.sqrt(d_v),
+                rn(*Wi_shape),# / np.sqrt(d_m),
+                rn(*Wo_shape),# / np.sqrt(d_v),
                 mask=True
             )),
             ResidualConnection(Attention(
-                rn(*Wi_shape),
-                rn(*Wo_shape)
+                rn(*Wi_shape),# / np.sqrt(d_m),
+                rn(*Wo_shape),# / np.sqrt(d_v)
             )),
             ResidualConnection(PositionWiseFfn(
-                rn(*W1_shape) / np.sqrt(d_m),
-                rn(*b1_shape) * 0.1,
-                rn(*W2_shape) / np.sqrt(d_ff),
-                rn(*b2_shape) * 0.1
+                rn(*W1_shape),# / np.sqrt(d_m),
+                rn(*b1_shape),
+                rn(*W2_shape),# / np.sqrt(d_ff),
+                rn(*b2_shape)
             ))
         ] for _ in range(repeat_num)]
         self.params = []
@@ -44,9 +44,21 @@ class Decoder:
     def forward(self, x, hs):
         for layer in self.layers:
             sa, at, pf = layer
+            # from matplotlib import pyplot as plt
+            # plt.subplot(221, title='input').imshow(x[0])
             x = sa.forward(x)
+            # plt.subplot(222, title='self attention').imshow(x[0])
             x = at.forward(x, hs)
+            # plt.subplot(223, title='cross-attention').imshow(x[0])
             x = pf.forward(x)
+            # plt.subplot(224, title='ffn').imshow(x[0])
+            # match input():
+            #     case 's':
+            #         plt.show()
+            #     case 'q':
+            #         exit()
+            #     case _:
+            #         continue
         return x
     
     def backward(self, dx):
@@ -57,8 +69,7 @@ class Decoder:
             dx, _dhs = at.backward(dx)
             dx = sa.backward(dx)
             if dhs == None:
-                dhs = [*_dhs]
+                dhs = _dhs
             else:
-                for i in range(len(_dhs)):
-                    dhs[i] += _dhs[i]
+                dhs += _dhs
         return dx, dhs

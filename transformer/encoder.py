@@ -19,14 +19,14 @@ class Encoder:
         self.layers = [
             [
                 ResidualConnection(SelfAttention(
-                    rn(*Wi_shape) / np.sqrt(d_m),
-                    rn(*Wo_shape) / np.sqrt(d_v)
+                    rn(*Wi_shape),# / np.sqrt(d_m),
+                    rn(*Wo_shape)# / np.sqrt(d_v)
                 )),
                 ResidualConnection(PositionWiseFfn(
-                    rn(*W1_shape) / np.sqrt(d_m),
-                    rn(*b1_shape) * 0.1,
-                    rn(*W2_shape) / np.sqrt(d_ff),
-                    rn(*b2_shape) * 0.1
+                    rn(*W1_shape),# / np.sqrt(d_m),
+                    rn(*b1_shape) * 0.01,
+                    rn(*W2_shape),# / np.sqrt(d_ff),
+                    rn(*b2_shape) * 0.01
                 ))
             ] for _ in range(repeat_num)
         ]
