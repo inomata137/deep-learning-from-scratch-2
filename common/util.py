@@ -229,7 +229,7 @@ def eval_seq2seq(model, question, correct, id_to_char,
     correct = correct.flatten()
     # 頭の区切り文字
     start_id = correct[0]
-    correct = correct[1:]
+    correct = correct[:]
     guess = model.generate(question, start_id, len(correct))
 
     # 文字列へ変換

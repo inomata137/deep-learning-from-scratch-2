@@ -53,9 +53,8 @@ class ResidualConnection:
         self.params = layer.params
         self.grads = layer.grads
     
-    def forward(self, x, y=None):
-        args = (x,) if y is None else (x, y)
-        s = x + self.layer.forward(*args)
+    def forward(self, *args):
+        s = args[0] + self.layer.forward(*args)
         out = self.ln.forward(s)
         return out
 
@@ -64,6 +63,6 @@ class ResidualConnection:
         dx2 = self.layer.backward(dx1)
         if type(dx2) == tuple:
             dx1 += dx2[0]
-            return dx1, dx2[1:]
+            return dx1, *(dx2[1:])
         else:
             return dx1 + dx2
