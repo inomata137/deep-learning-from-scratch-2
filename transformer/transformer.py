@@ -5,7 +5,7 @@ import pickle
 import sys
 sys.path.append('..')
 from common.np import *
-from common.layers import SoftmaxWithLoss, MatMul, Embedding
+from common.layers import SoftmaxWithLoss, MatMul, Embedding, Dropout
 from common.base_model import BaseModel
 
 np.random.seed(2023)
@@ -18,10 +18,12 @@ embed_weight = np.load('./learned_W_embed.npy')
 class Transformer(BaseModel):
     def __init__(self, d_m: int, h: int, d_ff: int, vocab_size: int, enc_rep=1, dec_rep=1, rn=rn):
         self.embed = Embedding(embed_weight) # (vs, d_m)
+        self.dropout_enc = Dropout(0.05)
+        self.dropout_dec = Dropout(0.05)
         self.enc = Encoder(d_m, h, d_ff, enc_rep, rn)
         self.dec = Decoder(d_m, h, d_ff, dec_rep, rn)
         self.matmul = MatMul(rn(d_m, vocab_size))
-        self.softmax = SoftmaxWithLoss()
+        self.softmax = SoftmaxWithLoss(e_ls=0.01)
 
         self.vocab_size = vocab_size
 
@@ -38,13 +40,15 @@ class Transformer(BaseModel):
         _, m = x_dec.shape
         self.N = N
         self.m = m
-        x_encoded = self.embed.forward(np.hstack((x_enc, x_dec)))
-        x_enc_encoded = x_encoded[:, :n, :]
-        x_dec_encoded = x_encoded[:, n:, :]
-        x_enc_encoded += pe(x_enc_encoded)
-        x_dec_encoded += pe(x_dec_encoded)
-        hs = self.enc.forward(x_enc_encoded)
-        y = self.dec.forward(x_dec_encoded, hs)
+        x_embedded = self.embed.forward(np.hstack((x_enc, x_dec)))
+        x_enc = x_embedded[:, :n, :]
+        x_dec = x_embedded[:, n:, :]
+        x_enc += pe(x_enc)
+        x_dec += pe(x_dec)
+        x_enc = self.dropout_enc.forward(x_enc)
+        x_dec = self.dropout_dec.forward(x_dec)
+        hs = self.enc.forward(x_enc)
+        y = self.dec.forward(x_dec, hs)
         y = self.matmul.forward(y)
         loss = self.softmax.forward(
             y.reshape((N * m, vs)),
@@ -60,6 +64,8 @@ class Transformer(BaseModel):
         dout = self.matmul.backward(dout)
         dx_dec, dhs = self.dec.backward(dout)
         dx_enc = self.enc.backward(dhs)
+        dx_enc = self.dropout_enc.backward(dx_enc)
+        dx_dec = self.dropout_dec.backward(dx_dec)
         dx = np.hstack((dx_enc, dx_dec))
         dx = self.embed.backward(dx)
         return dx
@@ -79,8 +85,8 @@ class Transformer(BaseModel):
             x_dec_encoded = x_encoded[:, n:, :]
             x_enc_encoded += pe(x_enc_encoded)
             x_dec_encoded += pe(x_dec_encoded)
-            hs = self.enc.forward(x_enc_encoded)
-            y = self.dec.forward(x_dec_encoded, hs)
+            hs = self.enc.forward(x_enc_encoded, False)
+            y = self.dec.forward(x_dec_encoded, hs, False)
             y = self.matmul.forward(y)
             x_dec[0, i + 1] = np.argmax(y[0, i])
 

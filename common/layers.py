@@ -65,12 +65,19 @@ class Softmax:
 
 
 class SoftmaxWithLoss:
-    def __init__(self):
+    def __init__(self, e_ls=0.):
         self.params, self.grads = [], []
         self.y = None  # softmaxの出力
         self.t = None  # 教師ラベル
+        self.e_ls = e_ls
 
     def forward(self, x, t):
+        '''
+        t: one-hot
+        '''
+        vs = t.shape[-1]
+        e_ls = self.e_ls
+        t = t * (1 - e_ls * vs / (vs - 1)) + e_ls / (vs - 1)
         self.t = t
         self.y = softmax(x)
 

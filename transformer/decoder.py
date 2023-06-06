@@ -32,16 +32,16 @@ class Decoder:
                 self.params += sublayer.params
                 self.grads += sublayer.grads
         
-    def forward(self, x, hs):
+    def forward(self, x, hs, train_flg=True):
         for layer in self.layers:
             sa, at, pf = layer
             # from matplotlib import pyplot as plt
             # plt.subplot(221, title='input').imshow(x[0])
-            x = sa.forward(x)
+            x = sa.forward(x, train_flg=train_flg)
             # plt.subplot(222, title='self attention').imshow(x[0])
-            x = at.forward(x, hs)
+            x = at.forward(x, hs, train_flg=train_flg)
             # plt.subplot(223, title='cross-attention').imshow(x[0])
-            x = pf.forward(x)
+            x = pf.forward(x, train_flg=train_flg)
             # plt.subplot(224, title='ffn').imshow(x[0])
             # match input():
             #     case 's':

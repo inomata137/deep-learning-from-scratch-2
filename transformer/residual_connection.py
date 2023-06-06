@@ -1,7 +1,8 @@
 import sys
+from base import Layer
 sys.path.append('..')
 from common.np import *  # import numpy as np
-from base import Layer
+from common.layers import Dropout
 
 class LayerNorm:
     def __init__(self, eps=1e-10):
@@ -46,20 +47,25 @@ class LayerNorm:
         return np.reshape(dx, dout.shape)
 
 class ResidualConnection:
-    def __init__(self, layer: Layer):
+    def __init__(self, layer: Layer, p_drop=0.05):
         self.layer = layer
-        self.ln = LayerNorm()
+        self.layer_norm = LayerNorm()
+        self.dropout = Dropout(p_drop)
         self.params = layer.params
         self.grads = layer.grads
     
-    def forward(self, *args):
-        s = args[0] + self.layer.forward(*args)
-        out = self.ln.forward(s)
+    def forward(self, *args, **kwargs):
+        train_flg = kwargs['train_flg']
+        y = self.layer.forward(*args)
+        y = self.dropout.forward(y, train_flg)
+        s = args[0] + y
+        out = self.layer_norm.forward(s)
         return out
 
     def backward(self, dout):
-        dx1 = self.ln.backward(dout)
-        dx2 = self.layer.backward(dx1)
+        dx1 = self.layer_norm.backward(dout)
+        dx2 = self.dropout.backward(dx1)
+        dx2 = self.layer.backward(dx2)
         if type(dx2) == tuple:
             dx1 += dx2[0]
             return dx1, *(dx2[1:])
