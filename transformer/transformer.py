@@ -16,10 +16,10 @@ rn = np.random.randn
 embed_weight = np.load('./learned_W_embed.npy')
 
 class Transformer(BaseModel):
-    def __init__(self, d_m: int, d_k: int, d_v: int, d_ff: int, vocab_size: int, enc_rep=1, dec_rep=1, rn=rn):
+    def __init__(self, d_m: int, h: int, d_ff: int, vocab_size: int, enc_rep=1, dec_rep=1, rn=rn):
         self.embed = Embedding(embed_weight) # (vs, d_m)
-        self.enc = Encoder(d_m, d_k, d_v, d_ff, enc_rep, rn)
-        self.dec = Decoder(d_m, d_k, d_v, d_ff, dec_rep, rn)
+        self.enc = Encoder(d_m, h, d_ff, enc_rep, rn)
+        self.dec = Decoder(d_m, h, d_ff, dec_rep, rn)
         self.matmul = MatMul(rn(d_m, vocab_size))
         self.softmax = SoftmaxWithLoss()
 

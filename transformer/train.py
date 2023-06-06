@@ -23,14 +23,14 @@ t_test = t_train[:10]
 vocab_size = len(char_to_id)
 d_m = wordvec_size = 16
 d_ff = hidden_size = 32
-d_k = d_v = 16
+h = 1
 enc_rep = 1
 dec_rep = 1
 batch_size = 32
 max_epoch = 10
 max_grad = 5.0
 
-model = Transformer(d_m, d_k, d_v, d_ff, vocab_size, enc_rep, dec_rep)
+model = Transformer(d_m, h, d_ff, vocab_size, enc_rep, dec_rep)
 # model = Seq2seq(vocab_size, wordvec_size, hidden_size)
 # model = PeekySeq2seq(vocab_size, wordvec_size, hidden_size)
 
