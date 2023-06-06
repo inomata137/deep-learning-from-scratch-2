@@ -2,7 +2,6 @@ import sys
 sys.path.append('..')
 from common.np import *  # import numpy as np
 from base import Layer
-from attention import Attention
 
 class LayerNorm:
     def __init__(self, eps=1e-10):

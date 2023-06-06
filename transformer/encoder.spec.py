@@ -7,9 +7,10 @@ rn = np.random.randn
 batch = 3
 n = 29
 d_m = 16
+h = 4
 d_ff = 24
 
-layer = Encoder(d_m, d_m, d_m, d_ff, 1)
+layer = Encoder(d_m, h, d_ff, 1, rn)
 
 x = rn(batch, n, d_m)
 y = layer.forward(x)
