@@ -41,14 +41,14 @@ class Transformer(BaseModel):
         self.N = N
         self.m = m
         x_embedded = self.embed.forward(np.hstack((x_enc, x_dec)))
-        x_enc = x_embedded[:, :n, :]
-        x_dec = x_embedded[:, n:, :]
-        x_enc += pe(x_enc)
-        x_dec += pe(x_dec)
-        x_enc = self.dropout_enc.forward(x_enc)
-        x_dec = self.dropout_dec.forward(x_dec)
-        hs = self.enc.forward(x_enc)
-        y = self.dec.forward(x_dec, hs)
+        x_enc_embedded = x_embedded[:, :n, :]
+        x_dec_embedded = x_embedded[:, n:, :]
+        x_enc_embedded += pe(x_enc_embedded)
+        x_dec_embedded += pe(x_dec_embedded)
+        x_enc_embedded = self.dropout_enc.forward(x_enc_embedded)
+        x_dec_embedded = self.dropout_dec.forward(x_dec_embedded)
+        hs = self.enc.forward(x_enc_embedded)
+        y = self.dec.forward(x_dec_embedded, hs)
         y = self.matmul.forward(y)
         loss = self.softmax.forward(
             y.reshape((N * m, vs)),
