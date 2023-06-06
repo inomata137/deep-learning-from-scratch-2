@@ -1,6 +1,6 @@
 # coding: utf-8
 import warnings
-from concurrent import futures
+# from concurrent import futures
 from simple_matmul import SimpleMatMul
 import sys
 sys.path.append('..')
@@ -81,11 +81,14 @@ class MultiheadAttention:
         '''
         x: (N, n, d_m)
         '''
-        result: list[futures.Future] = []
-        with futures.ThreadPoolExecutor() as executor:
-            for head in self.heads:
-                result.append(executor.submit(head.forward, x_q, x_kv))
-        result = tuple(f.result() for f in result)
+        # result: list[futures.Future] = []
+        # with futures.ThreadPoolExecutor() as executor:
+        #     for head in self.heads:
+        #         result.append(executor.submit(head.forward, x_q, x_kv))
+        # result = tuple(f.result() for f in result)
+        result = tuple(
+            head.forward(x_q, x_kv) for head in self.heads
+        )
         x = np.dstack(result)
         x = self.wo.forward(x)
         return x
@@ -95,12 +98,15 @@ class MultiheadAttention:
         dout: (N, n, d_m)
         '''
         dout = self.wo.backward(dout) # (N, n, h*d_v)
-        result = []
-        with futures.ThreadPoolExecutor() as executor:
-            for i, head in enumerate(self.heads):
-                datt = dout[:, :, i*self.d_v:(i+1)*self.d_v]
-                result.append(executor.submit(head.backward, datt))
-        result = [f.result() for f in result]
+        # result = []
+        # with futures.ThreadPoolExecutor() as executor:
+        #     for i, head in enumerate(self.heads):
+        #         datt = dout[:, :, i*self.d_v:(i+1)*self.d_v]
+        #         result.append(executor.submit(head.backward, datt))
+        # result = [f.result() for f in result]
+        result = [head.backward(
+            dout[:, :, i*self.d_v:(i+1)*self.d_v]
+        ) for i, head in enumerate(self.heads)]
         dx_q = 0
         dx_kv = 0
         for r in result:
