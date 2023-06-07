@@ -35,6 +35,7 @@ class AttentionHead:
         ]
         self.d_k = d_k
         self.mask = mask
+        self.attention_weight = None
 
     def forward(self, x_q: np.ndarray, x_kv: np.ndarray):
         q = self.wq.forward(x_q)
@@ -45,6 +46,7 @@ class AttentionHead:
             r, c = x.shape[-2:]
             x += np.log(np.tri(r, c, 0))
         x = self.softmax.forward(x)
+        self.attention_weight = x.copy()
         x = self.matmul2.forward(x, v)
         return x
 
