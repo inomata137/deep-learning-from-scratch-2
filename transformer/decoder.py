@@ -19,10 +19,10 @@ class Decoder:
             ResidualConnection(MultiheadSelfAttention(d_m, h, True, rn)),
             ResidualConnection(MultiheadCrossAttention(d_m, h, rn)),
             ResidualConnection(PositionWiseFfn(
-                rn(*W1_shape),# / np.sqrt(d_m),
-                rn(*b1_shape),
-                rn(*W2_shape),# / np.sqrt(d_ff),
-                rn(*b2_shape)
+                rn(*W1_shape) / np.sqrt(d_m),
+                rn(*b1_shape) * 0.1,
+                rn(*W2_shape) / np.sqrt(d_ff),
+                rn(*b2_shape) * 0.1
             ))
         ] for _ in range(repeat_num)]
         self.params = []

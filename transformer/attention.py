@@ -11,9 +11,9 @@ warnings.filterwarnings('ignore', 'divide by zero encountered in log')
 
 class AttentionHead:
     def __init__(self, d_m: int, d_k: int, mask: bool, rn=np.random.randn):
-        self.wq = MatMul(rn(d_m, d_k))
-        self.wk = MatMul(rn(d_m, d_k))
-        self.wv = MatMul(rn(d_m, d_k))
+        self.wq = MatMul(rn(d_m, d_k) / np.sqrt(d_m))
+        self.wk = MatMul(rn(d_m, d_k) / np.sqrt(d_m))
+        self.wv = MatMul(rn(d_m, d_k) / np.sqrt(d_m))
         self.matmul1 = SimpleMatMul()
         self.softmax = Softmax()
         self.matmul2 = SimpleMatMul()
@@ -68,7 +68,7 @@ class MultiheadAttention:
         assert d_m % h == 0, 'd_m/h should be an integer'
         d_v = d_k = d_m // h
         self.heads = [AttentionHead(d_m, d_k, mask, rn) for _ in range(h)]
-        self.wo = MatMul(rn(d_m, d_m))
+        self.wo = MatMul(rn(d_m, d_m) / np.sqrt(d_m))
         self.params = []
         self.grads = []
         for head in self.heads:

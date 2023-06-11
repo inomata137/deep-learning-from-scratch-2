@@ -22,7 +22,7 @@ class Transformer(BaseModel):
         self.dropout_dec = Dropout(0.05)
         self.enc = Encoder(d_m, h, d_ff, enc_rep, rn)
         self.dec = Decoder(d_m, h, d_ff, dec_rep, rn)
-        self.matmul = MatMul(rn(d_m, vocab_size))
+        self.matmul = MatMul(rn(d_m, vocab_size) / np.sqrt(d_m))
         self.softmax = SoftmaxWithLoss(e_ls=0.01)
 
         self.vocab_size = vocab_size

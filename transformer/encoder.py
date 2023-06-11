@@ -1,6 +1,5 @@
 from ffn import PositionWiseFfn
 from residual_connection import ResidualConnection
-from self_attention import SelfAttention
 from attention import MultiheadSelfAttention
 import sys
 sys.path.append('..')
@@ -18,10 +17,10 @@ class Encoder:
         self.layers = [[
             ResidualConnection(MultiheadSelfAttention(d_m, h, False, rn)),
             ResidualConnection(PositionWiseFfn(
-                rn(*W1_shape),# / np.sqrt(d_m),
-                rn(*b1_shape) * 0.01,
-                rn(*W2_shape),# / np.sqrt(d_ff),
-                rn(*b2_shape) * 0.01
+                rn(*W1_shape) / np.sqrt(d_m),
+                rn(*b1_shape) * 0.1,
+                rn(*W2_shape) / np.sqrt(d_ff),
+                rn(*b2_shape) * 0.1
             ))
         ] for _ in range(repeat_num)]
         self.params = []
