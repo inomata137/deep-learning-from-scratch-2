@@ -80,13 +80,9 @@ class SoftmaxWithLoss:
         '''
         vs = t.shape[-1]
         e_ls = self.e_ls
-        t = t * (1 - e_ls * vs / (vs - 1)) + e_ls / (vs - 1)
-        self.t = t
+        # label smoothing
+        self.t = t * (1 - e_ls * vs / (vs - 1)) + e_ls / (vs - 1)
         self.y = softmax(x)
-
-        # 教師ラベルがone-hotベクトルの場合、正解のインデックスに変換
-        # if self.t.size == self.y.size:
-        #     self.t = self.t.argmax(axis=1)
 
         loss = cross_entropy_error(self.y, self.t)
         return loss
