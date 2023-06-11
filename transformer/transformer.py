@@ -54,7 +54,8 @@ class Transformer(BaseModel):
             y.reshape((N * m, vs)),
             np.roll(np.eye(vs)[x_dec], -1, 1).reshape((N * m, vs))
         )
-        return loss
+        correct_count = (y.argmax(-1) == x_dec).all(axis=-1).sum()
+        return loss, correct_count
     
     def backward(self, dout=None):
         N = self.N

@@ -36,7 +36,8 @@ class Trainer:
                 batch_t = t[iters*batch_size:(iters+1)*batch_size]
 
                 # 勾配を求め、パラメータを更新
-                loss = model.forward(batch_x, batch_t)
+                res = model.forward(batch_x, batch_t)
+                loss, correct_count = res if type(res) == tuple else (res, 0)
                 model.backward()
                 # params, grads = remove_duplicate(model.params, model.grads)  # 共有された重みを1つに集約
                 params, grads = model.params, model.grads
@@ -50,8 +51,8 @@ class Trainer:
                 if (eval_interval is not None) and (iters % eval_interval) == 0:
                     avg_loss = total_loss / loss_count
                     elapsed_time = time.time() - start_time
-                    print('| epoch %d |  iter %d / %d | time %d[s] | loss %.2f'
-                          % (self.current_epoch + 1, iters + 1, max_iters, elapsed_time, avg_loss))
+                    print('| epoch %d |  iter %d / %d | time %d[s] | loss %.2f | acc. %d / %d |'
+                          % (self.current_epoch + 1, iters + 1, max_iters, elapsed_time, avg_loss, correct_count, batch_size))
                     self.loss_list.append(float(avg_loss))
                     total_loss, loss_count = 0, 0
 
