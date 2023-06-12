@@ -30,10 +30,10 @@ class Encoder:
                 self.params += sublayer.params
                 self.grads += sublayer.grads
     
-    def forward(self, x, train_flg=True):
+    def forward(self, x, train_flg=True, epoch=0):
         for layer in self.layers:
             for sublayer in layer:
-                x = sublayer.forward(x, train_flg=train_flg)
+                x = sublayer.forward(x, train_flg=train_flg, epoch=epoch)
         return x
     
     def backward(self, dx):

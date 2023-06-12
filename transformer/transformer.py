@@ -30,7 +30,7 @@ class Transformer(BaseModel):
         self.params = self.embed.params + self.enc.params + self.dec.params + self.matmul.params
         self.grads = self.embed.grads + self.enc.grads + self.dec.grads + self.matmul.grads
     
-    def forward(self, x_enc, x_dec):
+    def forward(self, x_enc, x_dec, epoch=0):
         '''
         x_enc: N x n
         x_dec: N x m
@@ -47,15 +47,17 @@ class Transformer(BaseModel):
         x_dec_embedded += pe(x_dec_embedded)
         x_enc_embedded = self.dropout_enc.forward(x_enc_embedded)
         x_dec_embedded = self.dropout_dec.forward(x_dec_embedded)
-        hs = self.enc.forward(x_enc_embedded)
-        y = self.dec.forward(x_dec_embedded, hs)
+        hs = self.enc.forward(x_enc_embedded, epoch=epoch)
+        y = self.dec.forward(x_dec_embedded, hs, epoch=epoch)
         y = self.matmul.forward(y)
         loss = self.softmax.forward(
             y.reshape((N * m, vs)),
             np.roll(np.eye(vs)[x_dec], -1, 1).reshape((N * m, vs))
         )
-        correct_count = (y.argmax(-1) == x_dec).all(axis=-1).sum()
-        return loss, correct_count
+        correct_count = (
+            y.argmax(-1) == np.roll(np.asarray(x_dec), -1, 1)
+        ).all(axis=-1).sum()
+        return loss, correct_count.item()
     
     def backward(self, dout=None):
         N = self.N

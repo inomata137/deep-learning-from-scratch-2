@@ -16,7 +16,7 @@ class Trainer:
         self.eval_interval = None
         self.current_epoch = 0
 
-    def fit(self, x, t, max_epoch=10, batch_size=32, max_grad=None, eval_interval=20):
+    def fit(self, x, t, max_epoch=10, batch_size=32, max_grad=None, eval_interval=20, epoch=0):
         data_size = len(x)
         max_iters = data_size // batch_size
         self.eval_interval = eval_interval
@@ -25,19 +25,21 @@ class Trainer:
         loss_count = 0
 
         start_time = time.time()
-        for epoch in range(max_epoch):
+        for _ in range(max_epoch):
             # シャッフル
             idx = numpy.random.permutation(numpy.arange(data_size))
             x = x[idx]
             t = t[idx]
+            train_acc = 0
 
             for iters in range(max_iters):
                 batch_x = x[iters*batch_size:(iters+1)*batch_size]
                 batch_t = t[iters*batch_size:(iters+1)*batch_size]
 
                 # 勾配を求め、パラメータを更新
-                res = model.forward(batch_x, batch_t)
+                res = model.forward(batch_x, batch_t, epoch=epoch)
                 loss, correct_count = res if type(res) == tuple else (res, 0)
+                train_acc += correct_count
                 model.backward()
                 # params, grads = remove_duplicate(model.params, model.grads)  # 共有された重みを1つに集約
                 params, grads = model.params, model.grads
@@ -56,6 +58,7 @@ class Trainer:
                     self.loss_list.append(float(avg_loss))
                     total_loss, loss_count = 0, 0
 
+            print(f'train data accuracy: {round(train_acc / data_size * 100, 3)}%')
             self.current_epoch += 1
 
     # def plot(self, ylim=None):
