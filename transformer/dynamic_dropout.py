@@ -8,7 +8,6 @@ class DynamicDropout:
         self.mask = None
 
     def forward(self, x: np.ndarray, train_flg=True, epoch=0):
-        print(epoch)
         p = 0.15 * (1 - 1.1 ** epoch)
         if train_flg:
             self.mask = np.random.rand(*x.shape) > p
