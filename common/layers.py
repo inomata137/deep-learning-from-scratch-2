@@ -91,7 +91,7 @@ class SoftmaxWithLoss:
         t = self.t
 
         dx = self.y.copy()
-        dx -= np.eye(t.shape[1])[t.argmax(axis=-1)]
+        dx -= t
         dx *= dout
         dx = dx / t.shape[0]
 
