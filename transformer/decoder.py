@@ -43,13 +43,6 @@ class Decoder:
             # plt.subplot(223, title='cross-attention').imshow(x[0])
             x = pf.forward(x, train_flg=train_flg, epoch=epoch)
             # plt.subplot(224, title='ffn').imshow(x[0])
-            # match input():
-            #     case 's':
-            #         plt.show()
-            #     case 'q':
-            #         exit()
-            #     case _:
-            #         continue
         return x
     
     def backward(self, dx):

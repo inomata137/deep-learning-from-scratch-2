@@ -14,21 +14,21 @@ from transformer import Transformer
 char_to_id, id_to_char = sequence.get_vocab()
 
 # 訓練データを減らす
-x_train = x_train[:1000]
-t_train = t_train[:1000]
-x_test = x_train[:10]
-t_test = t_train[:10]
+# x_train = x_train[:1000]
+# t_train = t_train[:1000]
+x_test = x_train[:100]
+t_test = t_train[:100]
 
 # ハイパーパラメータの設定
 vocab_size = len(char_to_id)
-d_m = wordvec_size = 16
-d_ff = hidden_size = 32
-h = 1
+d_m = wordvec_size = 32
+d_ff = hidden_size = 8
+h = 2
 enc_rep = 1
 dec_rep = 1
-batch_size = 32
-max_epoch = 10
-max_grad = 5.0
+batch_size = 128
+max_epoch = 30
+max_grad = 10.0
 
 model = Transformer(d_m, h, d_ff, vocab_size, enc_rep, dec_rep)
 # model = Seq2seq(vocab_size, wordvec_size, hidden_size)
@@ -54,10 +54,11 @@ for epoch in range(max_epoch):
     acc_list.append(acc)
     print('val acc %.3f%%' % (acc * 100))
 
-
-model.save_params()
-
 print(acc_list)
+
+if input('save? ') == 'yes':
+    model.save_params()
+
 # グラフの描画
 # x = np.arange(len(acc_list))
 # plt.plot(x, acc_list, marker='o')

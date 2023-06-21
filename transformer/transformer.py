@@ -10,16 +10,12 @@ from common.base_model import BaseModel
 
 np.random.seed(2023)
 rn = np.random.randn
-# with open('./embed.pkl', 'rb') as f:
-#     embed_weight = pickle.load(f)
-
-embed_weight = np.load('./learned_W_embed.npy')
 
 class Transformer(BaseModel):
     def __init__(self, d_m: int, h: int, d_ff: int, vocab_size: int, enc_rep=1, dec_rep=1, rn=rn):
-        self.embed = Embedding(embed_weight) # (vs, d_m)
-        self.dropout_enc = Dropout(0.05)
-        self.dropout_dec = Dropout(0.05)
+        self.embed = Embedding(rn(vocab_size, d_m))
+        self.dropout_enc = Dropout(0.1)
+        self.dropout_dec = Dropout(0.1)
         self.enc = Encoder(d_m, h, d_ff, enc_rep, rn)
         self.dec = Decoder(d_m, h, d_ff, dec_rep, rn)
         self.matmul = MatMul(rn(d_m, vocab_size) / np.sqrt(d_m))
@@ -88,6 +84,8 @@ class Transformer(BaseModel):
             x_dec_encoded = x_encoded[:, n:, :]
             x_enc_encoded += pe(x_enc_encoded)
             x_dec_encoded += pe(x_dec_encoded)
+            x_enc_embedded = self.dropout_enc.forward(x_enc_encoded, False)
+            x_dec_embedded = self.dropout_dec.forward(x_dec_encoded, False)
             hs = self.enc.forward(x_enc_encoded, False)
             y = self.dec.forward(x_dec_encoded, hs, False)
             y = self.matmul.forward(y)
