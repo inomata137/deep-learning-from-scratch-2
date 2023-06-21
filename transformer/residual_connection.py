@@ -1,6 +1,5 @@
 import sys
 from base import Layer
-from dynamic_dropout import DynamicDropout
 sys.path.append('..')
 from common.np import *  # import numpy as np
 from common.layers import Dropout
@@ -48,10 +47,10 @@ class LayerNorm:
         return np.reshape(dx, dout.shape)
 
 class ResidualConnection:
-    def __init__(self, layer: Layer, p_drop=0.05):
+    def __init__(self, layer: Layer, p_drop: float):
         self.layer = layer
         self.layer_norm = LayerNorm()
-        self.dropout = DynamicDropout()
+        self.dropout = Dropout(p_drop)
         self.params = layer.params
         self.grads = layer.grads
     
