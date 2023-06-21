@@ -83,8 +83,8 @@ class Transformer(BaseModel):
             x_dec_encoded = x_encoded[:, n:, :]
             x_enc_encoded += pe(x_enc_encoded)
             x_dec_encoded += pe(x_dec_encoded)
-            x_enc_embedded = self.dropout_enc.forward(x_enc_encoded, False)
-            x_dec_embedded = self.dropout_dec.forward(x_dec_encoded, False)
+            x_enc_encoded = self.dropout_enc.forward(x_enc_encoded, False)
+            x_dec_encoded = self.dropout_dec.forward(x_dec_encoded, False)
             hs = self.enc.forward(x_enc_encoded, False)
             y = self.dec.forward(x_dec_encoded, hs, False)
             y = self.matmul.forward(y)
