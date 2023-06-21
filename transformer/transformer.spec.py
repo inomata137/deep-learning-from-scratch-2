@@ -14,10 +14,12 @@ h = 4
 d_ff = 24
 rep = 2
 
-layer = Transformer(d_m, h, d_ff, vs, rep, rep, rn)
+layer = Transformer(d_m, h, d_ff, vs, rep, rep, 0., 0., rn)
 x_enc = ri(0, vs, (batch, n))
 x_dec = ri(0, vs, (batch, m))
-y = layer.forward(x_enc, x_dec)
-assert type(y) == np.float64
+y, c = layer.forward(x_enc, x_dec)
+assert type(y) == np.float64 and type(c) == int
 
-assert layer.backward()  is None
+assert layer.backward() is None
+
+print('ok')

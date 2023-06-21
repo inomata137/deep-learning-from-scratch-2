@@ -8,16 +8,15 @@ from common.np import *
 from common.layers import SoftmaxWithLoss, MatMul, Embedding, Dropout
 from common.base_model import BaseModel
 
-np.random.seed(2023)
 rn = np.random.randn
 
 class Transformer(BaseModel):
-    def __init__(self, d_m: int, h: int, d_ff: int, vocab_size: int, enc_rep=1, dec_rep=1, rn=rn):
+    def __init__(self, d_m: int, h: int, d_ff: int, vocab_size: int, enc_rep: int, dec_rep: int, p_drop_embed: float, p_drop_sublayer: float, rn=rn):
         self.embed = Embedding(rn(vocab_size, d_m))
-        self.dropout_enc = Dropout(0.1)
-        self.dropout_dec = Dropout(0.1)
-        self.enc = Encoder(d_m, h, d_ff, enc_rep, rn)
-        self.dec = Decoder(d_m, h, d_ff, dec_rep, rn)
+        self.dropout_enc = Dropout(p_drop_embed)
+        self.dropout_dec = Dropout(p_drop_embed)
+        self.enc = Encoder(d_m, h, d_ff, enc_rep, p_drop_sublayer, rn)
+        self.dec = Decoder(d_m, h, d_ff, dec_rep, p_drop_sublayer, rn)
         self.matmul = MatMul(rn(d_m, vocab_size) / np.sqrt(d_m))
         self.softmax = SoftmaxWithLoss(e_ls=0.01)
 

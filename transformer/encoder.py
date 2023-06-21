@@ -8,20 +8,11 @@ from common.np import *  # import numpy as np
 rn = np.random.randn
 
 class Encoder:
-    def __init__(self, d_m, h, d_ff, repeat_num=6, rn=rn):
+    def __init__(self, d_m, h, d_ff, repeat_num: int, p_drop: float, rn=rn):
         assert d_m % h == 0
-        W1_shape = d_m, d_ff
-        b1_shape = 1, d_ff
-        W2_shape = d_ff, d_m
-        b2_shape = 1, d_m
         self.layers = [[
-            ResidualConnection(MultiheadSelfAttention(d_m, h, False, rn)),
-            ResidualConnection(PositionWiseFfn(
-                rn(*W1_shape) / np.sqrt(d_m),
-                rn(*b1_shape) * 0.1,
-                rn(*W2_shape) / np.sqrt(d_ff),
-                rn(*b2_shape) * 0.1
-            ))
+            ResidualConnection(MultiheadSelfAttention(d_m, h, False, rn), p_drop),
+            ResidualConnection(PositionWiseFfn(d_m, d_ff, 0.1, 0.1, rn), p_drop)
         ] for _ in range(repeat_num)]
         self.params = []
         self.grads = []

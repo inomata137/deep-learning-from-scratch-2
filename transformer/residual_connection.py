@@ -55,10 +55,9 @@ class ResidualConnection:
         self.grads = layer.grads
     
     def forward(self, *args, **kwargs):
-        train_flg = kwargs['train_flg']
-        epoch: int = kwargs['epoch']
+        train_flg = kwargs.get('train_flg', True)
         y = self.layer.forward(*args)
-        y = self.dropout.forward(y, train_flg, epoch)
+        y = self.dropout.forward(y, train_flg)
         s = args[0] + y
         out = self.layer_norm.forward(s)
         return out

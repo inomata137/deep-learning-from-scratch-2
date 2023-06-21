@@ -34,7 +34,7 @@ n = 29
 d_m = 32
 
 W = rn(d_m, d_m)
-layer = ResidualConnection(MatMul(W))
+layer = ResidualConnection(MatMul(W), 0.)
 
 x = rn(batch, n, d_m)
 y = layer.forward(x)
@@ -51,3 +51,5 @@ for _ in range(100):
     dloss2 = np.sum(dx * grad)
     r = dloss1 / dloss2
     assert r > 0.999 and r < 1.001, f'expected r around 1, got {r}'
+
+print('ok')

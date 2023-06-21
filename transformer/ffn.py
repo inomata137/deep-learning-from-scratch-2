@@ -19,17 +19,11 @@ class Relu:
         return self.cache * dx
 
 class PositionWiseFfn:
-    def __init__(self, W1, b1, W2, b2):
-        '''
-        W1: d_m x d_ff
-        b1: 1 x d_ff
-        W2: d_ff x d_m
-        b2: 1 x d_m
-        '''
+    def __init__(self, d_m: int, d_ff: int, b1_scale=1., b2_scale=1., rn=np.random.randn):
         self.relu_layer = Relu()
         self.affine_layers = [
-            Affine(W1, b1),
-            Affine(W2, b2)
+            Affine(rn(d_m, d_ff) / np.sqrt(d_m), rn(1, d_ff) * b1_scale),
+            Affine(rn(d_ff, d_m) / np.sqrt(d_ff), rn(1, d_m) * b2_scale)
         ]
         self.params = []
         self.grads = []

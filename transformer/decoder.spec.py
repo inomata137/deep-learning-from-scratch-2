@@ -11,7 +11,7 @@ rep = 2
 n = 29
 m = 31
 
-dec = Decoder(d_m, h, d_ff, rep, rn)
+dec = Decoder(d_m, h, d_ff, rep, 0., rn)
 
 hs = rn(batch, n, d_m)
 x = rn(batch, m, d_m)
@@ -29,4 +29,5 @@ for _ in range(100):
     dloss2 = np.sum(dx * grad_x)
     r = dloss1 / dloss2
     assert r > 0.999 and r < 1.001, f'expected r around 1, got {r}'
+
 print('ok')

@@ -1,4 +1,5 @@
 # coding: utf-8
+from transformer import Transformer
 import sys
 sys.path.append('..')
 # import matplotlib.pyplot as plt
@@ -6,8 +7,7 @@ from dataset import sequence
 from common.optimizer import Adam
 from common.trainer import Trainer
 from common.util import eval_seq2seq
-from transformer import Transformer
-
+from common.np import *
 
 # データの読み込み
 (x_train, t_train), (x_test, t_test) = sequence.load_data('date.txt')
@@ -29,12 +29,32 @@ dec_rep = 1
 batch_size = 128
 max_epoch = 30
 max_grad = 10.0
+p_drop_embed = 0.05
+p_drop_sublayer = 0.25
+seed = 2023
+lr = 0.002
 
-model = Transformer(d_m, h, d_ff, vocab_size, enc_rep, dec_rep)
+print('-' * 10)
+print(f'd_m = {d_m}')
+print(f'd_ff = {d_ff}')
+print(f'h = {h}')
+print(f'enc_rep = {enc_rep}')
+print(f'dec_rep = {dec_rep}')
+print(f'batch_size = {batch_size}')
+print(f'max_grad = {max_grad}')
+print(f'p_drop_embed = {p_drop_embed}')
+print(f'p_drop_sublayer = {p_drop_sublayer}')
+print(f'seed = {seed}')
+print(f'lr = {lr}')
+print('-' * 10)
+
+np.random.seed(seed)
+
+model = Transformer(d_m, h, d_ff, vocab_size, enc_rep, dec_rep, p_drop_embed, p_drop_sublayer, np.random.randn)
 # model = Seq2seq(vocab_size, wordvec_size, hidden_size)
 # model = PeekySeq2seq(vocab_size, wordvec_size, hidden_size)
 
-optimizer = Adam(lr=0.002, beta2=0.98)
+optimizer = Adam(lr, beta2=0.98)
 trainer = Trainer(model, optimizer)
 
 acc_list = []
@@ -57,12 +77,5 @@ for epoch in range(max_epoch):
 print(acc_list)
 
 if input('save? ') == 'yes':
-    model.save_params()
-
-# グラフの描画
-# x = np.arange(len(acc_list))
-# plt.plot(x, acc_list, marker='o')
-# plt.xlabel('epochs')
-# plt.ylabel('accuracy')
-# plt.ylim(-0.05, 1.05)
-# plt.show()
+    filename = input('filename: ') or None
+    model.save_params(filename)

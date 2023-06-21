@@ -10,7 +10,7 @@ d_m = 16
 h = 4
 d_ff = 24
 
-layer = Encoder(d_m, h, d_ff, 1, rn)
+layer = Encoder(d_m, h, d_ff, 1, 0., rn)
 
 x = rn(batch, n, d_m)
 y = layer.forward(x)
@@ -27,3 +27,5 @@ for _ in range(100):
     dloss2 = np.sum(dx * grad)
     r = dloss1 / dloss2
     assert r > 0.999 and r < 1.001
+
+print('ok')
